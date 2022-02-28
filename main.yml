@@ -1,0 +1,9 @@
+---
+
+- name: Centrify Add Your
+  hosts: xxx
+  connection: winrm
+  port: 5986
+  vars_files: host_vars/variables.yml
+  roles:
+    - AddServer
