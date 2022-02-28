@@ -1,0 +1,39 @@
+---
+
+- name: Import environment variables
+  include_vars: host_vars/variables.yml
+  no_log: true
+
+  tasks:
+        
+    - name: Add User to AD Admin Group
+
+      block:
+      
+        - name: Get AD membership info for Users
+          win_shell: Get-ADPrincipalGroupMembership -Identity "CN={{ new_server_name }},OU=Global,OU=Centrify,DC=xxxx,DC=com"
+          vars:
+            ansible_become: yes
+            # ansible_become_method: runas
+            # ansible_become_user: xxx\name
+          register: memberinfo
+          ignore_errors: True
+          
+        - name: print Get-ADPrincipalGroupMembership
+          debug:
+            var: memberinfo.stdout
+              
+        - name: Add User to AD Group
+          when: memberinfo.stdout is not search('{{ centrify_group_cn }}')
+          win_shell: addserver.ps1 {{ new_server_name }}
+          vars:
+            ansible_become: yes
+            ansible_become_method: runas
+          register: memberadd
+#           ignore_errors: True
+         
+        - name: print Add-ADGroupMember
+          debug:
+            var: memberadd
+           
+
